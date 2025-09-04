@@ -8,57 +8,19 @@ import {
   MessageCircleIcon,
 } from "lucide-react";
 import Header from "./Header";
+import { useChat } from "../hooks/useChat";
 
 export default function ChatbotComponent() {
-  const [messages, setMessages] = useState([]);
-  const [inputText, setInputText] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
-  const messagesEndRef = useRef(null);
-
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  };
-
-  useEffect(() => {
-    scrollToBottom();
-  }, [messages]);
-
-  const botResponses = [
-    "That's really interesting! I'd be happy to help you explore this further.",
-    "I understand what you're asking. Let me break this down for you.",
-    "Thanks for sharing that with me. Here's my perspective on this topic.",
-    "Great question! This is something I can definitely help you with.",
-    "I see what you mean. Let me provide some insights on this.",
-    "That's a thoughtful message. I appreciate you taking the time to explain.",
-  ];
-
-  const handleSendMessage = () => {
-    if (!inputText.trim() || isLoading) return;
-
-    // Add user message
-    const userMessage = {
-      id: Date.now(),
-      text: inputText.trim(),
-      isBot: false,
-      timestamp: Date.now(),
-    };
-
-    setMessages((prev) => [...prev, userMessage]);
-    setInputText("");
-    setIsLoading(true);
-
-    // Simulate bot response
-    setTimeout(() => {
-      const botMessage = {
-        id: Date.now() + 1,
-        text: botResponses[Math.floor(Math.random() * botResponses.length)],
-        isBot: true,
-        timestamp: Date.now(),
-      };
-      setMessages((prev) => [...prev, botMessage]);
-      setIsLoading(false);
-    }, 1000 + Math.random() * 2000);
-  };
+  const {
+    messages,
+    inputText,
+    setInputText,
+    isTyping,
+    handleSendMessage,
+    textareaRef,
+    messagesEndRef,
+    scrollToBottom,
+  } = useChat();
 
   const handleFileSelect = (file) => {
     // Add file message
@@ -69,20 +31,63 @@ export default function ChatbotComponent() {
       isBot: false,
       timestamp: Date.now(),
     };
-
-    setMessages((prev) => [...prev, fileMessage]);
-
-    // Simulate bot response to file
-    setTimeout(() => {
-      const botMessage = {
-        id: Date.now() + 1,
-        text: `I can see you've uploaded "${file.name}". While I can't actually process files in this demo, in a real implementation I would analyze the content and provide relevant insights!`,
-        isBot: true,
-        timestamp: Date.now(),
-      };
-      setMessages((prev) => [...prev, botMessage]);
-    }, 1500);
   };
+  // const handleKeyPress = () => {
+  //   // if (!inputText.trim() || isLoading) return;
+
+  //   //   // Add user message
+  //   //   const userMessage = {
+  //   //     id: Date.now(),
+  //   //     text: inputText.trim(),
+  //   //     isBot: false,
+  //   //     timestamp: Date.now(),
+  //   //   };
+
+  //   //   setMessages((prev) => [...prev, userMessage]);
+  //   //   setInputText("");
+  //   //   setIsLoading(true);
+
+  //   //   // Simulate bot response
+  //   //   setTimeout(() => {
+  //   //     const botMessage = {
+  //   //       id: Date.now() + 1,
+  //   //       text: botResponses[Math.floor(Math.random() * botResponses.length)],
+  //   //       isBot: true,
+  //   //       timestamp: Date.now(),
+  //   //     };
+  //   //     setMessages((prev) => [...prev, botMessage]);
+  //   //     setIsLoading(false);
+  //   //   }, 1000 + Math.random() * 2000);
+
+  //   // };
+
+  //   // const handleFileSelect = (file) => {
+  //   //   // Add file message
+  //   //   const fileMessage = {
+  //   //     id: Date.now(),
+  //   //     text: `Uploaded: ${file.name}`,
+  //   //     file: file,
+  //   //     isBot: false,
+  //   //     timestamp: Date.now(),
+  //   //   };
+
+  //   //   setMessages((prev) => [...prev, fileMessage]);
+
+  //   //   // Simulate bot response to file
+  //   //   setTimeout(() => {
+  //   //     const botMessage = {
+  //   //       id: Date.now() + 1,
+  //   //       text: `I can see you've uploaded "${file.name}". While I can't actually process files in this demo, in a real implementation I would analyze the content and provide relevant insights!`,
+  //   //       isBot: true,
+  //   //       timestamp: Date.now(),
+  //   //     };
+  //   //     setMessages((prev) => [...prev, botMessage]);
+  //   //   }, 1500);
+  // };
+
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages]);
 
   return (
     <div className="bg-slate-900 text-gray-100">
@@ -125,10 +130,10 @@ export default function ChatbotComponent() {
         <div className="bg-slate-800 rounded-xl shadow-lg min-h-[500px] flex flex-col">
           {" "}
           <div className="flex-1 overflow-y-auto p-6 space-y-4">
-            {messages.map((message) => (
-              <ChatMessage key={message.id} message={message} />
+            {messages?.map((message) => (
+              <ChatMessage key={message?.id} message={message} />
             ))}
-            {isLoading && (
+            {isTyping && (
               <div className="flex items-start space-x-3">
                 <div className="w-8 h-8 bg-emerald-500 rounded-full flex items-center justify-center">
                   <MessageCircle className="w-4 h-4 text-slate-900" />
@@ -155,7 +160,7 @@ export default function ChatbotComponent() {
             setInputText={setInputText}
             onSendMessage={handleSendMessage}
             onFileSelect={handleFileSelect}
-            isLoading={isLoading}
+            isLoading={isTyping}
           />
         </div>
         {/* Input Area */}
