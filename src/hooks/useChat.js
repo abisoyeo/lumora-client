@@ -1,10 +1,10 @@
 import { useEffect, useRef, useState } from "react";
 import { sendMessage } from "../lib/api";
 
-export function useChat(defaultMessage) {
+export function useChat() {
   const [messages, setMessages] = useState(() => {
     const saved = localStorage.getItem("chatMessages");
-    return saved ? JSON.parse(saved) : [defaultMessage];
+    return saved ? JSON.parse(saved) : [];
   });
 
   const [inputText, setInputText] = useState("");

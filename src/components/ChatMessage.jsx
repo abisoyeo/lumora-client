@@ -14,11 +14,11 @@ export default function ChatMessage({ message }) {
         message?.isBot ? "" : "justify-end"
       }`}
     >
-      {message?.isBot && (
+      {/* {message?.isBot && (
         <div className="w-8 h-8 bg-emerald-500 rounded-full flex items-center justify-center flex-shrink-0">
           <MessageCircle className="w-4 h-4 text-slate-900" />
         </div>
-      )}
+      )} */}
 
       <div
         className={`max-w-xs sm:max-w-md lg:max-w-lg ${
@@ -108,11 +108,11 @@ export default function ChatMessage({ message }) {
         </div>
       </div>
 
-      {!message?.isBot && (
+      {/* {!message?.isBot && (
         <div className="w-8 h-8 bg-slate-600 rounded-full flex items-center justify-center flex-shrink-0 order-3">
           <User className="w-4 h-4 text-gray-300" />
         </div>
-      )}
+      )} */}
     </div>
   );
 }
