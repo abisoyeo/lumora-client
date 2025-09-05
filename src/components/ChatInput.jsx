@@ -16,6 +16,7 @@ export default function ChatInput({
   const handleKeyDown = (e) => {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
+      if (!inputText.trim() || isLoading) return;
       onSendMessage();
     }
   };
@@ -45,7 +46,6 @@ export default function ChatInput({
           className="w-full px-1 py-5 md:px-3 md:py-5 resize-none transition-all placeholder-gray-400 border-none outline-none text-sm leading-6 scrollbar-custom-width"
           rows={1}
           style={{ minHeight: "36px", maxHeight: "100px" }}
-          disabled={isLoading}
         />
         <button
           onClick={onSendMessage}

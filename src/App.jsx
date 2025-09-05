@@ -6,7 +6,7 @@ const App = () => {
     <div className="min-h-screen bg-slate-900 text-gray-100">
       {/* Navbar */}
       <Header />
-      <main className="container mx-auto px-4 py-8 max-w-6xl">
+      <main className="container mx-auto px-4 pt-2 md:py-8 max-w-6xl">
         <ChatbotComponent />
       </main>
     </div>
