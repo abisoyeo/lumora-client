@@ -42,7 +42,7 @@ export default function ChatInput({
           onChange={(e) => setInputText(e.target.value)}
           onKeyDown={handleKeyDown}
           placeholder="Ask me about Nigerian tax laws..."
-          className="w-full px-1 py-5 md:px-3 md:py-2 resize-none transition-all placeholder-gray-400 border-none outline-none text-sm leading-6 scrollbar-custom-width"
+          className="w-full px-1 py-5 md:px-3 md:py-5 resize-none transition-all placeholder-gray-400 border-none outline-none text-sm leading-6 scrollbar-custom-width"
           rows={1}
           style={{ minHeight: "36px", maxHeight: "100px" }}
           disabled={isLoading}
@@ -57,7 +57,7 @@ export default function ChatInput({
           }`}
         >
           {isLoading ? (
-            <div className="w-5 h-5 bg-gray-300 border-2 border-white border-t-transparent rounded-full animate-spin" />
+            <div className="w-5 h-5 bg-slate-600 border-3 border-[#30c522] border-t-transparent rounded-full animate-spin" />
           ) : (
             <Send className="w-5 h-5 " />
           )}
