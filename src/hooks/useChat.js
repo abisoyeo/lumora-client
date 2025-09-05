@@ -14,6 +14,11 @@ export function useChat() {
   const messagesEndRef = useRef(null);
   const textareaRef = useRef(null);
 
+  const sessionToken =
+    localStorage.getItem("sessionToken") ||
+    Math.random().toString(36).substring(2, 10);
+  localStorage.setItem("sessionToken", sessionToken);
+
   useEffect(() => {
     localStorage.setItem("chatMessages", JSON.stringify(messages));
   }, [messages]);
@@ -25,7 +30,12 @@ export function useChat() {
   const sendMessageToServer = async (message) => {
     try {
       const response = await sendMessage(message);
-      return response.answer;
+      // Return answer if it exists, otherwise return error, otherwise fallback string
+      return (
+        response.answer ??
+        response.error ??
+        "❌ Sorry, something went wrong. Please try again."
+      );
     } catch (error) {
       console.error(error);
       return "❌ Sorry, something went wrong. Please try again.";
@@ -49,7 +59,7 @@ export function useChat() {
 
     const replyText = await sendMessageToServer({
       query: userMessage.text,
-      session_token: "hardcoded_string27",
+      session_token: sessionToken,
     });
 
     // ✅ stop typing indicator as soon as response is back
