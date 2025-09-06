@@ -28,7 +28,10 @@ export function useChat(user, currentSession, onUpdateSession) {
   const sendMessageToServer = async (messageText) => {
     if (user?.isPremium) {
       try {
-        const res = await sendMessagePremium({ query: messageText });
+        const res = await sendMessagePremium({
+          query: messageText,
+          session_token: "",
+        });
         return res.answer ?? res.error ?? "❌ Something went wrong.";
       } catch (err) {
         console.error(err);
