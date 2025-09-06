@@ -9,12 +9,14 @@ export function useChat(user, currentSession, onUpdateSession) {
   const messagesEndRef = useRef(null);
   const textareaRef = useRef(null);
 
-  const sessionToken =
+  // Only generate token once per session
+  const sessionTokenRef = useRef(
     localStorage.getItem("sessionToken") ||
-    Math.random().toString(36).substring(2, 10);
-  localStorage.setItem("sessionToken", sessionToken);
+      Math.random().toString(36).substring(2, 10)
+  );
+  localStorage.setItem("sessionToken", sessionTokenRef.current);
 
-  // Reset when session changes
+  // Reset messages when session changes
   useEffect(() => {
     setMessages(currentSession?.messages || []);
   }, [currentSession?.id]);
@@ -23,35 +25,26 @@ export function useChat(user, currentSession, onUpdateSession) {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
 
-  const sendFreeMessageToServer = async (message) => {
-    try {
-      const response = await sendMessageFree(message);
-      return (
-        response.answer ??
-        response.error ??
-        "❌ Sorry, something went wrong. Please try again."
-      );
-    } catch (error) {
-      console.error(error);
-      return (
-        error.message || "❌ Sorry, something went wrong. Please try again."
-      );
-    }
-  };
-
-  const sendPremiumMessageToServer = async (message) => {
-    try {
-      const response = await sendMessagePremium(message);
-      return (
-        response.answer ??
-        response.error ??
-        "❌ Sorry, something went wrong. Please try again."
-      );
-    } catch (error) {
-      console.error(error);
-      return (
-        error.message || "❌ Sorry, something went wrong. Please try again."
-      );
+  const sendMessageToServer = async (messageText) => {
+    if (user?.isPremium) {
+      try {
+        const res = await sendMessagePremium({ query: messageText });
+        return res.answer ?? res.error ?? "❌ Something went wrong.";
+      } catch (err) {
+        console.error(err);
+        return err.message ?? "❌ Something went wrong.";
+      }
+    } else {
+      try {
+        const res = await sendMessageFree({
+          query: messageText,
+          session_token: sessionTokenRef.current,
+        });
+        return res.answer ?? res.error ?? "❌ Something went wrong.";
+      } catch (err) {
+        console.error(err);
+        return err.message ?? "❌ Something went wrong.";
+      }
     }
   };
 
@@ -68,24 +61,17 @@ export function useChat(user, currentSession, onUpdateSession) {
     const updatedMessages = [...messages, userMessage];
     setMessages(updatedMessages);
 
+    // Update session immediately with user's message
     onUpdateSession?.({ ...currentSession, messages: updatedMessages });
 
     setInputText("");
     setIsTyping(true);
 
-    const replyText = user?.isPremium
-      ? await sendPremiumMessageToServer({
-          query: userMessage.text,
-          session_token: "",
-        })
-      : await sendFreeMessageToServer({
-          query: userMessage.text,
-          session_token: sessionToken,
-        });
+    const botReply = await sendMessageToServer(userMessage.text);
 
     const botMessage = {
       id: Date.now(),
-      text: replyText,
+      text: botReply,
       isBot: true,
       timestamp: Date.now(),
     };
@@ -93,6 +79,7 @@ export function useChat(user, currentSession, onUpdateSession) {
     const finalMessages = [...updatedMessages, botMessage];
     setMessages(finalMessages);
 
+    // Final session update
     onUpdateSession?.({ ...currentSession, messages: finalMessages });
 
     setIsTyping(false);
