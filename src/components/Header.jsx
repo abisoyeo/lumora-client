@@ -32,7 +32,7 @@ const Header = ({
         {/* Left Section: Logo */}
         <div className="flex items-center justify-center">
           <button
-            onClick={() => setCurrentView("chat")}
+            onClick={onCreateNewSession}
             className="flex items-center space-x-2"
           >
             <div className="w-8 h-8 bg-emerald-500 rounded-lg flex items-center justify-center">
