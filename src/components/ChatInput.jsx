@@ -10,6 +10,7 @@ export default function ChatInput({
   onSendMessage,
   onFileSelect,
   isLoading,
+  user,
 }) {
   const textareaRef = useRef(null);
 
@@ -36,7 +37,9 @@ export default function ChatInput({
   return (
     <div className="w-full">
       <div className="flex bg-slate-700 rounded-4xl items-center gap-1 md:gap-3 px-3 md:py-2">
-        <FileUpload onFileSelect={onFileSelect} />
+        {user?.isPremium && (
+          <FileUpload onFileSelect={onFileSelect} variant="icon" />
+        )}
         <textarea
           ref={textareaRef}
           value={inputText}

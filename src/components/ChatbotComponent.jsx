@@ -69,7 +69,7 @@ export default function ChatbotComponent({
                   </p>
                 </div>
                 <div className="bg-gradient-to-br from-emerald-900/30 to-emerald-800/30 p-3 md:p-6 rounded-xl border border-emerald-500/30">
-                  <h3 className="font-semibold text-emerald-400 mb-2 flex items-center">
+                  <h3 className="font-semibold text-emerald-400 mb-2 flex items-center justify-center">
                     <Crown className="w-4 h-4 mr-2" />
                     Premium Features
                   </h3>
@@ -127,7 +127,20 @@ export default function ChatbotComponent({
             onSendMessage={handleSendMessage}
             onFileSelect={handleFileSelect}
             isLoading={isTyping}
+            user={user}
           />
+        </div>
+        <div className="mt-3 text-xs text-gray-400 text-center">
+          {!user ? (
+            <span>
+              Login for premium features including chat history and document
+              uploads
+            </span>
+          ) : user.isPremium ? (
+            <span>Premium user - All features enabled</span>
+          ) : (
+            <span>Free user - Upgrade for advanced features</span>
+          )}
         </div>
       </div>
     </div>

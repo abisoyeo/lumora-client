@@ -1,5 +1,5 @@
-import React from "react";
 import { MessageCircle, Plus, Clock, FileText } from "lucide-react";
+import FileUpload from "./FileUpload";
 
 const Dashboard = ({
   user,
@@ -7,6 +7,16 @@ const Dashboard = ({
   onSelectSession,
   onCreateNewSession,
 }) => {
+  const handleFileSelect = (file) => {
+    const fileMessage = {
+      id: Date.now(),
+      text: `Uploaded: ${file.name}`,
+      file: file,
+      isBot: false,
+      timestamp: Date.now(),
+    };
+  };
+
   const formatDate = (date) => {
     const now = new Date();
     const diffInHours = Math.floor(
@@ -20,9 +30,9 @@ const Dashboard = ({
   };
 
   return (
-    <div className="max-w-6xl mx-auto">
+    <div className="max-w-6xl mx-auto p-3 md:p-0">
       {/* Header */}
-      <div className="mb-8">
+      <div className="mb-4 md:mb-8">
         <h1 className="text-3xl font-bold text-emerald-400 mb-2">
           Welcome back, {user.name}!
         </h1>
@@ -32,7 +42,7 @@ const Dashboard = ({
       </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-3 md:gap-6 mb-4 md:mb-8">
         <div className="bg-slate-800 rounded-xl p-6 border border-slate-700">
           <div className="flex items-center justify-between">
             <div>
@@ -77,28 +87,29 @@ const Dashboard = ({
       </div>
 
       {/* Quick Actions */}
-      <div className="mb-8">
+      <div className="mb-4 md:mb-8">
         <h2 className="text-xl font-semibold text-gray-200 mb-4">
           Quick Actions
         </h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <button
             onClick={onCreateNewSession}
-            className="bg-emerald-500 hover:bg-emerald-400 text-slate-900 p-4 rounded-xl flex items-center space-x-3 transition-all group"
+            className="bg-emerald-500 hover:bg-emerald-400 text-slate-900 p-4 rounded-xl flex items-center space-x-3 transition-all cursor-pointer group"
           >
             <Plus className="w-6 h-6 group-hover:scale-110 transition-transform" />
             <span className="font-medium">Start New Chat</span>
           </button>
 
-          <button className="bg-slate-800 hover:bg-slate-700 text-gray-200 p-4 rounded-xl flex items-center space-x-3 transition-all border border-slate-700 group">
-            <FileText className="w-6 h-6 text-emerald-400 group-hover:scale-110 transition-transform" />
-            <span>Upload Document</span>
-          </button>
+          <FileUpload
+            onFileSelect={handleFileSelect}
+            variant="button"
+            label="Upload Document"
+          />
 
-          <button className="bg-slate-800 hover:bg-slate-700 text-gray-200 p-4 rounded-xl flex items-center space-x-3 transition-all border border-slate-700 group">
+          {/* <button className="bg-slate-800 hover:bg-slate-700 text-gray-200 p-4 rounded-xl flex items-center space-x-3 transition-all border border-slate-700 group">
             <MessageCircle className="w-6 h-6 text-emerald-400 group-hover:scale-110 transition-transform" />
             <span>Tax Calculator</span>
-          </button>
+          </button> */}
         </div>
       </div>
 
@@ -145,7 +156,7 @@ const Dashboard = ({
               </p>
               <button
                 onClick={onCreateNewSession}
-                className="px-6 py-3 bg-emerald-500 text-slate-900 rounded-lg hover:bg-emerald-400 transition-all font-medium"
+                className="px-6 py-3 bg-emerald-500 text-slate-900 rounded-lg hover:bg-emerald-400 transition-all cursor-pointer font-medium"
               >
                 Start First Chat
               </button>
