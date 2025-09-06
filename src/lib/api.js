@@ -1,7 +1,12 @@
 import axiosInstance from "./axios";
 
-export const sendMessage = async (msg) => {
+export const sendMessageFree = async (msg) => {
   const response = await axiosInstance.post("/api/chat/anonymous", msg);
+  return response.data;
+};
+
+export const sendMessagePremium = async (msg) => {
+  const response = await axiosInstance.post("/api/chat/premium", msg);
   return response.data;
 };
 

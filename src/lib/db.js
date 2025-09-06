@@ -30,13 +30,36 @@ export async function saveSession(session) {
   });
 }
 
-// Get all sessions
-export async function getAllSessions() {
+// Get sessions only for the logged-in user
+export async function getAllSessions(userId) {
   const db = await openDB();
   return new Promise((resolve, reject) => {
     const tx = db.transaction(STORE_NAME, "readonly");
-    const request = tx.objectStore(STORE_NAME).getAll();
-    request.onsuccess = () => resolve(request.result);
+    const store = tx.objectStore(STORE_NAME);
+    const request = store.getAll();
+    request.onsuccess = () => {
+      const allSessions = request.result || [];
+      resolve(allSessions.filter((s) => s.userId === userId));
+    };
+    request.onerror = () => reject(request.error);
+  });
+}
+
+// Delete all sessions for a user (useful on logout)
+export async function clearUserSessions(userId) {
+  const db = await openDB();
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction(STORE_NAME, "readwrite");
+    const store = tx.objectStore(STORE_NAME);
+    const request = store.getAll();
+
+    request.onsuccess = () => {
+      const sessions = request.result || [];
+      sessions
+        .filter((s) => s.userId === userId)
+        .forEach((s) => store.delete(s.id));
+      resolve(true);
+    };
     request.onerror = () => reject(request.error);
   });
 }

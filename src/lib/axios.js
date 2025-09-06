@@ -21,7 +21,7 @@ axiosInstance.interceptors.request.use(
       if (isTokenExpired(token)) {
         localStorage.removeItem("access_token");
         if (logoutCallback) logoutCallback();
-        throw new axios.Cancel("Token expired");
+        throw new axios.Cancel("Session expired, please log in again.");
       }
 
       config.headers["Authorization"] = `Bearer ${token}`;
