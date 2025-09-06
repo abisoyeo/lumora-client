@@ -138,7 +138,7 @@ const Header = ({
                   onCreateNewSession();
                   setIsMobileMenuOpen(false);
                 }}
-                className="flex items-center space-x-2 w-full px-3 py-2 bg-emerald-600 text-slate-900 rounded-lg hover:bg-emerald-500 transition-all"
+                className="flex items-center space-x-2 w-full px-3 py-2 bg-emerald-100 text-slate-900 rounded-lg hover:bg-emerald-500 transition-all"
               >
                 <Plus className="w-4 h-4" />
                 <span>New Chat</span>
@@ -168,7 +168,12 @@ const Header = ({
                     setCurrentView("login");
                     setIsMobileMenuOpen(false);
                   }}
-                  className="flex items-center space-x-2 w-full px-4 py-2 bg-emerald-500 text-slate-900 rounded-lg hover:bg-emerald-400 transition-all"
+                  className={`flex items-center space-x-2 w-full px-4 py-2 rounded-lg 
+                    ${
+                      currentView === "login"
+                        ? "bg-emerald-500 text-slate-900"
+                        : "text-gray-300 hover:text-emerald-400 hover:bg-slate-700"
+                    }`}
                 >
                   <User className="w-4 h-4" />
                   <span>Login</span>

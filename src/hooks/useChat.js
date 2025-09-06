@@ -38,7 +38,9 @@ export function useChat() {
       );
     } catch (error) {
       console.error(error);
-      return "❌ Sorry, something went wrong. Please try again.";
+      return (
+        error.message || "❌ Sorry, something went wrong. Please try again."
+      );
     }
   };
 

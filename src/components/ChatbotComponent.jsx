@@ -93,7 +93,7 @@ export default function ChatbotComponent({
 
         {/* Messages Area */}
         {messages.length > 0 && (
-          <div className="flex-1 overflow-y-auto p-2 md:p-6 space-y-4 min-h-0 pb-20 md:pb-15">
+          <div className="flex-1 overflow-y-auto p-2 pb-30 md:p-6 space-y-4 min-h-0 md:pb-15">
             {messages.map((message) => (
               <ChatMessage key={message.id} message={message} />
             ))}
