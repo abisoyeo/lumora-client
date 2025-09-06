@@ -3,7 +3,7 @@ import { login, signup } from "../lib/api";
 import { parseApiError } from "../lib/errors";
 import { setLogoutHandler } from "../lib/axios";
 
-export function useAuth() {
+export function useAuth(setCurrentView) {
   const [user, setUser] = useState(null);
   const [error, setError] = useState(null);
 
@@ -19,9 +19,6 @@ export function useAuth() {
   const handleLogin = async (loginData) => {
     try {
       const response = await login(loginData);
-
-      console.log(response);
-
       // He should send user login details along with token
 
       // const user = {
@@ -79,6 +76,7 @@ export function useAuth() {
 
   const handleLogout = () => {
     setUser(null);
+    setCurrentView("chat");
     localStorage.removeItem("lumora_user");
     localStorage.removeItem("access_token");
   };

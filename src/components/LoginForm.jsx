@@ -1,7 +1,13 @@
 import { useState } from "react";
 import { User, Lock, Eye, EyeOff } from "lucide-react";
 
-const LoginForm = ({ onLogin, onCancel, onSwitchToSignup, error }) => {
+const LoginForm = ({
+  onLogin,
+  onCancel,
+  onSwitchToSignup,
+  error,
+  setError,
+}) => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -16,6 +22,7 @@ const LoginForm = ({ onLogin, onCancel, onSwitchToSignup, error }) => {
       await onLogin({ username, password });
     } finally {
       setIsLoading(false);
+      setError(null);
     }
   };
 

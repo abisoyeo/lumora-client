@@ -15,7 +15,7 @@ import { useAuth } from "./hooks/useAuth";
 
 const App = () => {
   const { user, error, handleLogin, handleSignup, handleLogout, setError } =
-    useAuth();
+    useAuth(setCurrentView);
 
   const [currentView, setCurrentView] = useState("chat");
   const [chatSessions, setChatSessions] = useState([]);
@@ -169,6 +169,7 @@ const App = () => {
             onSwitchToSignup={() => setCurrentView("signup")}
             onCancel={() => setCurrentView("chat")}
             error={error}
+            setError={setError}
           />
         )}
 
@@ -181,6 +182,7 @@ const App = () => {
             onSwitchToLogin={() => setCurrentView("login")}
             onCancel={() => setCurrentView("chat")}
             error={error}
+            setError={setError}
           />
         )}
 

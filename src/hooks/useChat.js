@@ -9,12 +9,23 @@ export function useChat(user, currentSession, onUpdateSession) {
   const messagesEndRef = useRef(null);
   const textareaRef = useRef(null);
 
-  // Only generate token once per session
   const sessionTokenRef = useRef(
-    localStorage.getItem("sessionToken") ||
-      Math.random().toString(36).substring(2, 10)
+    user?.isPremium
+      ? currentSession?.sessionToken ||
+          Math.random().toString(36).substring(2, 10)
+      : localStorage.getItem("sessionToken") ||
+          Math.random().toString(36).substring(2, 10)
   );
-  localStorage.setItem("sessionToken", sessionTokenRef.current);
+
+  // store it for premium users
+  if (user?.isPremium && !currentSession?.sessionToken) {
+    currentSession.sessionToken = sessionTokenRef.current;
+  }
+
+  // store it for free/anonymous users
+  if (!user?.isPremium) {
+    localStorage.setItem("sessionToken", sessionTokenRef.current);
+  }
 
   // Reset messages when session changes
   useEffect(() => {
@@ -30,7 +41,7 @@ export function useChat(user, currentSession, onUpdateSession) {
       try {
         const res = await sendMessagePremium({
           query: messageText,
-          session_token: "",
+          session_token: sessionTokenRef.current,
         });
         return res.answer ?? res.error ?? "❌ Something went wrong.";
       } catch (err) {
