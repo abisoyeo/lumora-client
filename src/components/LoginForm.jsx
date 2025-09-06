@@ -1,23 +1,32 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { User, Lock, Eye, EyeOff } from "lucide-react";
 
-const LoginForm = ({ onLogin, onCancel, onSwitchToSignup }) => {
-  const [email, setEmail] = useState("");
+const LoginForm = ({ onLogin, onCancel, onSwitchToSignup, error }) => {
+  const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setIsLoading(true);
+    if (isLoading) return;
 
-    onLogin({ email, password });
-    setIsLoading(false);
+    setIsLoading(true);
+    try {
+      await onLogin({ username, password });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
     <div className="max-w-lg mx-auto">
       <div className="bg-slate-800 rounded-xl p-6 shadow-lg">
+        {error && (
+          <div className="bg-red-600 text-white text-center py-2 px-4 rounded mb-4">
+            {error}
+          </div>
+        )}
         <div className="text-center mb-3">
           <div className="w-16 h-16 bg-emerald-500 rounded-full flex items-center justify-center mx-auto mb-4">
             <User className="w-8 h-8 text-slate-900" />
@@ -37,8 +46,8 @@ const LoginForm = ({ onLogin, onCancel, onSwitchToSignup }) => {
               <User className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
               <input
                 type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
                 className="w-full pl-10 pr-4 py-3 bg-slate-700 border border-slate-600 rounded-lg focus:ring-2 focus:ring-emerald-400 focus:border-transparent transition-all"
                 placeholder="Enter your email"
                 required

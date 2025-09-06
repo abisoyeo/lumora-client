@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { User, Lock, Eye, EyeOff } from "lucide-react";
 
-const SignupForm = ({ onSignup, onCancel, onSwitchToLogin }) => {
+const SignupForm = ({ onSignup, onCancel, onSwitchToLogin, error }) => {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -10,15 +10,25 @@ const SignupForm = ({ onSignup, onCancel, onSwitchToLogin }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (isLoading) return;
+
     setIsLoading(true);
 
-    onSignup({ name, email, password });
-    setIsLoading(false);
+    try {
+      await onSignup({ name, email, password });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
     <div className="max-w-lg mx-auto">
       <div className="bg-slate-800 rounded-xl p-6 shadow-lg">
+        {error && (
+          <div className="bg-red-600 text-white text-center py-2 px-4 rounded mb-4">
+            {error}
+          </div>
+        )}
         <div className="text-center mb-3">
           <div className="w-16 h-16 bg-emerald-500 rounded-full flex items-center justify-center mx-auto mb-3">
             <User className="w-8 h-8 text-slate-900" />
