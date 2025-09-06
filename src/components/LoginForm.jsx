@@ -37,7 +37,7 @@ const LoginForm = ({ onLogin, onCancel, onSwitchToSignup, error }) => {
           <p className="text-gray-400">Login to access your premium features</p>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-3">
+        <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label className="block text-sm font-medium text-gray-300 mb-1">
               Email Address
@@ -83,7 +83,7 @@ const LoginForm = ({ onLogin, onCancel, onSwitchToSignup, error }) => {
             </div>
           </div>
 
-          <div className="flex items-center justify-between">
+          {/* <div className="flex items-center justify-between">
             <label className="flex items-center">
               <input
                 type="checkbox"
@@ -97,7 +97,7 @@ const LoginForm = ({ onLogin, onCancel, onSwitchToSignup, error }) => {
             >
               Forgot password?
             </a>
-          </div>
+          </div> */}
 
           <button
             type="submit"

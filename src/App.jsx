@@ -4,116 +4,41 @@ import Header from "./components/Header";
 import Dashboard from "./components/Dashboard";
 import LoginForm from "./components/LoginForm";
 import SignupForm from "./components/SignupForm";
+import Settings from "./components/Settings";
+
 import { getAllSessions, saveSession } from "./lib/db";
-import { login, signup } from "./lib/api";
-import { setLogoutHandler } from "./lib/axios";
+import { useAuth } from "./hooks/useAuth";
 
 const App = () => {
-  const [user, setUser] = useState(null);
+  const { user, error, handleLogin, handleSignup, handleLogout, setError } =
+    useAuth();
+
   const [currentView, setCurrentView] = useState("chat");
   const [chatSessions, setChatSessions] = useState([]);
   const [currentSession, setCurrentSession] = useState(null);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [error, setError] = useState(null);
-
-  const handleLogin = async (loginData) => {
-    try {
-      const response = await login(loginData);
-
-      console.log(response);
-
-      // He should send user login details along with token
-
-      // const user = {
-      //   id: response.id,
-      //   name: response.profile.name,
-      //   email: response.email,
-      //   isPremium: response.subscription_type === "premium",
-      // };
-
-      const mockUser = {
-        id: "1",
-        name: "John Doe",
-        email: loginData.email,
-        isPremium: true,
-      };
-      setUser(mockUser);
-      setCurrentView("dashboard");
-    } catch (error) {
-      console.error("Login error:", error);
-
-      let message = "Login failed. Please try again.";
-
-      const detail = error.response?.data?.detail;
-
-      if (typeof detail === "string") {
-        // case: simple error message string
-        message = detail;
-      } else if (Array.isArray(detail)) {
-        // case: validation errors array
-        message = detail.map((err) => err.msg).join(", ");
-      }
-
-      setError(message);
-      return;
-    }
-  };
-
-  const handleSignup = async ({ name, email, password }) => {
-    try {
-      const response = await signup({
-        name,
-        email,
-        password,
-        subscription_type: "premium",
-      });
-      const user = {
-        id: response.id,
-        name: response.profile.name,
-        email: response.email,
-        isPremium: response.subscription_type === "premium",
-      };
-
-      setUser(user);
-      setCurrentView("dashboard");
-    } catch (error) {
-      console.error("Signup error:", error);
-      let message = "Login failed. Please try again.";
-
-      const detail = error.response?.data?.detail;
-
-      if (typeof detail === "string") {
-        // case: simple error message string
-        message = detail;
-      } else if (Array.isArray(detail)) {
-        // case: validation errors array
-        message = detail.map((err) => err.msg).join(", ");
-      }
-
-      setError(message);
-    }
-  };
-
-  const handleLogout = () => {
-    setUser(null);
-    setCurrentView("chat");
-    setChatSessions([]);
-    setCurrentSession(null);
-    localStorage.removeItem("access_token");
-  };
 
   const createNewSession = () => {
+    if (!user?.isPremium) return;
+
+    const newCount =
+      chatSessions.filter((s) => s.title.startsWith("New Conversation"))
+        .length + 1;
+
     const newSession = {
       id: Date.now().toString(),
-      title: "New Conversation",
+      title: `New Conversation ${newCount}`,
       lastMessage: "",
       timestamp: new Date(),
       messages: [],
+      userId: user.id,
     };
+
     setChatSessions((prev) => [newSession, ...prev]);
     setCurrentSession(newSession);
 
     saveSession(newSession);
+    setCurrentView("chat");
   };
 
   const selectSession = (session) => {
@@ -122,26 +47,68 @@ const App = () => {
   };
 
   const updateSession = (updatedSession) => {
-    setChatSessions((prev) =>
-      prev.map((s) => (s.id === updatedSession.id ? updatedSession : s))
-    );
-    setCurrentSession(updatedSession);
+    let sessionToSave = {
+      ...updatedSession,
+      timestamp: new Date(),
+    };
 
-    // Persist in IndexedDB
-    saveSession(updatedSession);
+    // Set lastMessage to last in the array
+    if (sessionToSave.messages.length > 0) {
+      sessionToSave.lastMessage =
+        sessionToSave.messages[sessionToSave.messages.length - 1].text;
+    }
+
+    // Improve title if first user message
+    if (
+      sessionToSave.messages.length === 1 &&
+      sessionToSave.title.startsWith("New Conversation")
+    ) {
+      const firstMessage = sessionToSave.messages[0].text || "Untitled";
+      sessionToSave.title = `${sessionToSave.title}: ${firstMessage.slice(
+        0,
+        30
+      )}`;
+    }
+
+    if (user?.isPremium) {
+      setChatSessions((prev) =>
+        prev.map((s) => (s.id === sessionToSave.id ? sessionToSave : s))
+      );
+      setCurrentSession(sessionToSave);
+      saveSession(sessionToSave); // IndexedDB
+    } else {
+      localStorage.setItem(
+        "freeUserChat",
+        JSON.stringify(sessionToSave.messages)
+      );
+      setCurrentSession(sessionToSave);
+    }
   };
 
-  // Load from IndexedDB on mount
   useEffect(() => {
-    setLogoutHandler(handleLogout);
+    if (user?.isPremium) {
+      getAllSessions(user.id).then((sessions) => setChatSessions(sessions));
+    } else {
+      const saved = localStorage.getItem("freeUserChat");
+      if (saved) {
+        const messages = JSON.parse(saved);
+        const defaultSession = {
+          id: "free-session",
+          title: "Free Chat",
+          messages,
+          timestamp: new Date(),
+        };
+        setCurrentSession(defaultSession);
+        setChatSessions([defaultSession]);
+      } else {
+        setCurrentSession(null);
+        setChatSessions([]);
+      }
+    }
+  }, [user]);
 
-    getAllSessions().then((sessions) => {
-      setChatSessions(sessions);
-    });
-  }, []);
   return (
     <div className="min-h-screen bg-slate-900 text-gray-100">
-      {/* Navbar */}
       <Header
         user={user}
         currentView={currentView}
@@ -152,6 +119,7 @@ const App = () => {
         onCreateNewSession={createNewSession}
         canCreateNew={!!user?.isPremium}
       />
+
       <main className="container mx-auto px-4 pt-2 md:py-8 max-w-6xl">
         {currentView === "chat" && (
           <ChatbotComponent
@@ -164,7 +132,10 @@ const App = () => {
 
         {currentView === "login" && (
           <LoginForm
-            onLogin={handleLogin}
+            onLogin={async (data) => {
+              const newUser = await handleLogin(data);
+              if (newUser) setCurrentView("dashboard");
+            }}
             onSwitchToSignup={() => setCurrentView("signup")}
             onCancel={() => setCurrentView("chat")}
             error={error}
@@ -173,7 +144,10 @@ const App = () => {
 
         {currentView === "signup" && (
           <SignupForm
-            onSignup={handleSignup}
+            onSignup={async (data) => {
+              const newUser = await handleSignup(data);
+              if (newUser) setCurrentView("dashboard");
+            }}
             onSwitchToLogin={() => setCurrentView("login")}
             onCancel={() => setCurrentView("chat")}
             error={error}
@@ -189,55 +163,7 @@ const App = () => {
           />
         )}
 
-        {currentView === "settings" && user && (
-          <div className="max-w-2xl mx-auto">
-            <div className="bg-slate-800 rounded-xl p-8 shadow-lg">
-              <h1 className="text-3xl font-bold text-emerald-400 mb-8">
-                Account Settings
-              </h1>
-
-              <div className="space-y-6">
-                <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-2">
-                    Name
-                  </label>
-                  <input
-                    type="text"
-                    value={user.name}
-                    className="w-full px-4 py-3 bg-slate-700 border border-slate-600 rounded-lg focus:ring-2 focus:ring-emerald-400 focus:border-transparent transition-all"
-                    readOnly
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-2">
-                    Email
-                  </label>
-                  <input
-                    type="email"
-                    value={user.email}
-                    className="w-full px-4 py-3 bg-slate-700 border border-slate-600 rounded-lg focus:ring-2 focus:ring-emerald-400 focus:border-transparent transition-all"
-                    readOnly
-                  />
-                </div>
-
-                <div className="flex items-center justify-between p-4 bg-emerald-900/20 border border-emerald-500/30 rounded-lg">
-                  <div>
-                    <h3 className="font-semibold text-emerald-400">
-                      Premium Account
-                    </h3>
-                    <p className="text-sm text-gray-400">
-                      Access to advanced features and chat history
-                    </p>
-                  </div>
-                  <div className="px-3 py-1 bg-emerald-500 text-slate-900 rounded-full text-sm font-medium">
-                    Active
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
+        {currentView === "settings" && user && <Settings user={user} />}
       </main>
     </div>
   );

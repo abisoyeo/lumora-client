@@ -1,14 +1,9 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect } from "react";
 import ChatMessage from "./ChatMessage";
 import ChatInput from "./ChatInput";
-import {
-  Crown,
-  LucideMessageCircle,
-  MessageCircle,
-  MessageCircleIcon,
-} from "lucide-react";
-import Header from "./Header";
+import { Crown, MessageCircle } from "lucide-react";
 import { useChat } from "../hooks/useChat";
+import TypingIndicator from "./TypingIndicator";
 
 export default function ChatbotComponent({
   user,
@@ -24,22 +19,22 @@ export default function ChatbotComponent({
     handleSendMessage,
     messagesEndRef,
     scrollToBottom,
-  } = useChat();
+  } = useChat(user, currentSession, onUpdateSession);
 
   const handleFileSelect = (file) => {
     const fileMessage = {
       id: Date.now(),
       text: `Uploaded: ${file.name}`,
-      file: file,
+      file,
       isBot: false,
       timestamp: Date.now(),
     };
+    const updated = [...messages, fileMessage];
+    onUpdateSession?.({ ...currentSession, messages: updated });
   };
 
   useEffect(() => {
-    if (messages.length > 0) {
-      scrollToBottom();
-    }
+    if (messages.length > 0) scrollToBottom();
   }, [messages]);
 
   return (
@@ -91,29 +86,12 @@ export default function ChatbotComponent({
           </div>
         )}
 
-        {/* Messages Area */}
         {messages.length > 0 && (
-          <div className="flex-1 overflow-y-auto p-2 pb-30 md:p-6 space-y-4 min-h-0 md:pb-15">
+          <div className="flex-1 overflow-y-auto p-2 pb-30 md:p-6 md:pb-25 space-y-4 min-h-0 ">
             {messages.map((message) => (
               <ChatMessage key={message.id} message={message} />
             ))}
-            {isTyping && (
-              <div className="flex items-start space-x-3">
-                <div className="bg-slate-700 rounded-2xl px-4 py-3 max-w-xs">
-                  <div className="flex space-x-1">
-                    <div className="w-2 h-2 bg-emerald-400 rounded-full animate-bounce"></div>
-                    <div
-                      className="w-2 h-2 bg-emerald-400 rounded-full animate-bounce"
-                      style={{ animationDelay: "0.1s" }}
-                    ></div>
-                    <div
-                      className="w-2 h-2 bg-emerald-400 rounded-full animate-bounce"
-                      style={{ animationDelay: "0.2s" }}
-                    ></div>
-                  </div>
-                </div>
-              </div>
-            )}
+            {isTyping && <TypingIndicator />}
             <div ref={messagesEndRef} />
           </div>
         )}
