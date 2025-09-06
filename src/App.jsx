@@ -6,7 +6,11 @@ import LoginForm from "./components/LoginForm";
 import SignupForm from "./components/SignupForm";
 import Settings from "./components/Settings";
 
-import { getAllSessions, saveSession } from "./lib/db";
+import {
+  getAllSessions,
+  saveSession,
+  deleteSession as dbDeleteSession,
+} from "./lib/db";
 import { useAuth } from "./hooks/useAuth";
 
 const App = () => {
@@ -52,36 +56,47 @@ const App = () => {
       timestamp: new Date(),
     };
 
-    // Set lastMessage to last in the array
     if (sessionToSave.messages.length > 0) {
-      sessionToSave.lastMessage =
-        sessionToSave.messages[sessionToSave.messages.length - 1].text;
-    }
+      const lastMsg = sessionToSave.messages[sessionToSave.messages.length - 1];
+      sessionToSave.lastMessage = lastMsg.text;
 
-    // Improve title if first user message
-    if (
-      sessionToSave.messages.length === 1 &&
-      sessionToSave.title.startsWith("New Conversation")
-    ) {
-      const firstMessage = sessionToSave.messages[0].text || "Untitled";
-      sessionToSave.title = `${sessionToSave.title}: ${firstMessage.slice(
-        0,
-        30
-      )}`;
+      // Improve title only if it's still generic
+      if (sessionToSave.title.startsWith("New Conversation")) {
+        const firstMsg = sessionToSave.messages[0]?.text || "Untitled";
+        sessionToSave.title = `Chat about: ${firstMsg.slice(0, 30)}`;
+      }
     }
 
     if (user?.isPremium) {
-      setChatSessions((prev) =>
-        prev.map((s) => (s.id === sessionToSave.id ? sessionToSave : s))
+      setChatSessions(
+        (prev) =>
+          prev
+            .map((s) => (s.id === sessionToSave.id ? sessionToSave : s))
+            .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp)) // newest first
       );
       setCurrentSession(sessionToSave);
-      saveSession(sessionToSave); // IndexedDB
+      saveSession(sessionToSave);
     } else {
       localStorage.setItem(
         "freeUserChat",
         JSON.stringify(sessionToSave.messages)
       );
       setCurrentSession(sessionToSave);
+    }
+  };
+
+  const deleteSession = async (sessionId) => {
+    if (user?.isPremium) {
+      setChatSessions((prev) => prev.filter((s) => s.id !== sessionId));
+      if (currentSession?.id === sessionId) {
+        setCurrentSession(null);
+      }
+      await dbDeleteSession(sessionId);
+    } else {
+      // Free user has only one session
+      localStorage.removeItem("freeUserChat");
+      setChatSessions([]);
+      setCurrentSession(null);
     }
   };
 
@@ -160,6 +175,7 @@ const App = () => {
             chatSessions={chatSessions}
             onSelectSession={selectSession}
             onCreateNewSession={createNewSession}
+            onDeleteSession={deleteSession}
           />
         )}
 

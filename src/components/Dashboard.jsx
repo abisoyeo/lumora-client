@@ -6,6 +6,7 @@ const Dashboard = ({
   chatSessions,
   onSelectSession,
   onCreateNewSession,
+  onDeleteSession,
 }) => {
   const handleFileSelect = (file) => {
     const fileMessage = {
@@ -121,29 +122,36 @@ const Dashboard = ({
         <div className="grid gap-4">
           {chatSessions.length > 0 ? (
             chatSessions.map((session) => (
-              <button
+              <div
                 key={session.id}
-                onClick={() => onSelectSession(session)}
-                className="bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-xl p-6 text-left transition-all group"
+                className="bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-xl p-6 text-left transition-all group flex justify-between items-start"
               >
-                <div className="flex items-start justify-between">
-                  <div className="flex-1 min-w-0">
-                    <h3 className="font-semibold text-gray-200 mb-2 group-hover:text-emerald-400 transition-colors">
-                      {session.title}
-                    </h3>
-                    <p className="text-gray-400 text-sm line-clamp-2 mb-3">
-                      {session.lastMessage}
-                    </p>
-                    <div className="flex items-center text-xs text-gray-500">
-                      <Clock className="w-4 h-4 mr-1" />
-                      {formatDate(session.timestamp)}
-                      <span className="mx-2">•</span>
-                      <span>{session.messages.length} messages</span>
-                    </div>
+                <button
+                  onClick={() => onSelectSession(session)}
+                  className="flex-1 text-left"
+                >
+                  <h3 className="font-semibold text-gray-200 mb-2 group-hover:text-emerald-400 transition-colors">
+                    {session.title}
+                  </h3>
+                  <p className="text-gray-400 text-sm line-clamp-2 mb-3">
+                    {session.lastMessage}
+                  </p>
+                  <div className="flex items-center text-xs text-gray-500">
+                    <Clock className="w-4 h-4 mr-1" />
+                    {formatDate(session.timestamp)}
+                    <span className="mx-2">•</span>
+                    <span>{session.messages.length} messages</span>
                   </div>
-                  <MessageCircle className="w-5 h-5 text-emerald-400 ml-4 opacity-0 group-hover:opacity-100 transition-opacity" />
-                </div>
-              </button>
+                </button>
+
+                <button
+                  onClick={() => onDeleteSession(session.id)}
+                  className="ml-4 text-red-50 hover:text-red-100 cursor-pointer  bg-red-500 rounded-lg flex items-center justify-center w-6 h-6"
+                  title="Delete conversation"
+                >
+                  ✕
+                </button>
+              </div>
             ))
           ) : (
             <div className="text-center py-12 bg-slate-800 rounded-xl border border-slate-700">

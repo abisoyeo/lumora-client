@@ -63,3 +63,16 @@ export async function clearUserSessions(userId) {
     request.onerror = () => reject(request.error);
   });
 }
+
+export async function deleteSession(sessionId) {
+  const db = await openDB();
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction(STORE_NAME, "readwrite");
+    const store = tx.objectStore(STORE_NAME);
+
+    store.delete(sessionId);
+
+    tx.oncomplete = () => resolve(true);
+    tx.onerror = (e) => reject(e);
+  });
+}
