@@ -68,7 +68,6 @@ export function useChat(user, currentSession, onUpdateSession) {
     const updatedMessages = [...messages, userMessage];
     setMessages(updatedMessages);
 
-    // ✅ Only notify App about updated messages
     onUpdateSession?.({ ...currentSession, messages: updatedMessages });
 
     setInputText("");
@@ -94,7 +93,6 @@ export function useChat(user, currentSession, onUpdateSession) {
     const finalMessages = [...updatedMessages, botMessage];
     setMessages(finalMessages);
 
-    // ✅ Only notify App again
     onUpdateSession?.({ ...currentSession, messages: finalMessages });
 
     setIsTyping(false);

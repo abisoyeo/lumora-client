@@ -26,7 +26,7 @@ const App = () => {
     if (!user?.isPremium) return;
 
     const newCount =
-      chatSessions.filter((s) => s.title.startsWith("New Conversation"))
+      chatSessions.filter((s) => s.title?.startsWith("New Conversation"))
         .length + 1;
 
     const newSession = {
