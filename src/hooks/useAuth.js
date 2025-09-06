@@ -19,26 +19,19 @@ export function useAuth(setCurrentView) {
   const handleLogin = async (loginData) => {
     try {
       const response = await login(loginData);
-      // He should send user login details along with token
 
-      // const user = {
-      //   id: response.id,
-      //   name: response.profile.name,
-      //   email: response.email,
-      //   isPremium: response.subscription_type === "premium",
-      // };
-
-      const mockUser = {
-        id: "1",
-        name: "John Doe",
-        email: loginData.email,
-        isPremium: true,
+      const user = {
+        id: response.id,
+        name: response.profile.name,
+        email: response.email,
+        isPremium: response.subscription_type === "premium",
       };
-      setUser(mockUser);
-      localStorage.setItem("lumora_user", JSON.stringify(mockUser));
+
+      setUser(user);
+      localStorage.setItem("lumora_user", JSON.stringify(user));
       localStorage.setItem("access_token", response.access_token);
 
-      return mockUser;
+      return user;
     } catch (err) {
       console.error("Login error:", err);
       setError(parseApiError(err, "Login failed. Please try again."));

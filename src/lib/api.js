@@ -12,6 +12,10 @@ export const sendMessagePremium = async (msg) => {
 
 export const signup = async (signupData) => {
   const response = await axiosInstance.post("/signup", signupData);
+
+  const { access_token } = response.data;
+
+  localStorage.setItem("access_token", access_token);
   return response.data;
 };
 export const login = async (loginData) => {

@@ -18,7 +18,7 @@ export function useChat(user, currentSession, onUpdateSession) {
   );
 
   // store it for premium users
-  if (user?.isPremium && !currentSession?.sessionToken) {
+  if (user?.isPremium && currentSession && !currentSession.sessionToken) {
     currentSession.sessionToken = sessionTokenRef.current;
   }
 

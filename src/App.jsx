@@ -14,13 +14,13 @@ import {
 import { useAuth } from "./hooks/useAuth";
 
 const App = () => {
-  const { user, error, handleLogin, handleSignup, handleLogout, setError } =
-    useAuth(setCurrentView);
-
   const [currentView, setCurrentView] = useState("chat");
   const [chatSessions, setChatSessions] = useState([]);
   const [currentSession, setCurrentSession] = useState(null);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
+  const { user, error, handleLogin, handleSignup, handleLogout, setError } =
+    useAuth(setCurrentView);
 
   const selectSession = (session) => {
     setCurrentSession(session);
