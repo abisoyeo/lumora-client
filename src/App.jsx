@@ -28,10 +28,8 @@ const App = () => {
   };
 
   const createNewSession = () => {
-    // For free users, only one session allowed
     if (!user?.isPremium && chatSessions.length > 0) return;
 
-    // Count only valid sessions that start with "New Conversation"
     const newCount =
       chatSessions.filter((s) => s && s.title?.startsWith("New Conversation"))
         .length + 1;
@@ -60,18 +58,15 @@ const App = () => {
   const updateSession = (updatedSession) => {
     if (!updatedSession) return;
 
-    // Clone and timestamp
     const sessionToSave = {
       ...updatedSession,
       timestamp: new Date(),
     };
 
-    // Update last message
     if (sessionToSave.messages.length > 0) {
       const lastMsg = sessionToSave.messages[sessionToSave.messages.length - 1];
       sessionToSave.lastMessage = lastMsg.text;
 
-      // Improve title if still generic
       if (sessionToSave.title?.startsWith("New Conversation")) {
         const firstMsg = sessionToSave.messages[0]?.text || "Untitled";
         sessionToSave.title = `Chat about: ${firstMsg.slice(0, 30)}`;
@@ -108,7 +103,6 @@ const App = () => {
         console.error("Failed to delete session from IndexedDB:", err);
       }
     } else {
-      // Free users only have one session
       localStorage.removeItem("freeUserChat");
       setChatSessions([]);
       setCurrentSession(null);

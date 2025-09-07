@@ -2,7 +2,6 @@ const DB_NAME = "chatAppDB";
 const STORE_NAME = "sessions";
 const DB_VERSION = 1;
 
-// Open DB
 function openDB() {
   return new Promise((resolve, reject) => {
     const request = indexedDB.open(DB_NAME, DB_VERSION);
@@ -19,7 +18,6 @@ function openDB() {
   });
 }
 
-// Save or update a session
 export async function saveSession(session) {
   const db = await openDB();
   return new Promise((resolve, reject) => {
@@ -30,7 +28,6 @@ export async function saveSession(session) {
   });
 }
 
-// Get sessions only for the logged-in user
 export async function getAllSessions(userId) {
   const db = await openDB();
   return new Promise((resolve, reject) => {
@@ -45,7 +42,6 @@ export async function getAllSessions(userId) {
   });
 }
 
-// Delete all sessions for a user (useful on logout)
 export async function clearUserSessions(userId) {
   const db = await openDB();
   return new Promise((resolve, reject) => {

@@ -1,4 +1,3 @@
-// lib/streamChat.js
 export async function streamChat({
   url = `${import.meta.env.VITE_API_URL || "/api"}/chat/stream/anonymous`,
   body,
@@ -14,7 +13,7 @@ export async function streamChat({
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Accept: "text/event-stream", // ask for SSE, but we’ll handle plain text too
+        Accept: "text/event-stream",
       },
       body: JSON.stringify(body),
       signal,

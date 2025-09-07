@@ -9,6 +9,10 @@ export const setLogoutHandler = (fn) => {
 
 const BASE_URL = import.meta.env.VITE_API_URL || "/api";
 
+const publicClient = axios.create({
+  baseURL: BASE_URL,
+});
+
 const axiosInstance = axios.create({
   baseURL: BASE_URL,
 });
@@ -32,4 +36,4 @@ axiosInstance.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
-export default axiosInstance;
+export { axiosInstance, publicClient };

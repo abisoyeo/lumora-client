@@ -2,7 +2,6 @@ import { useEffect, useRef, useState } from "react";
 import { streamChat } from "../lib/streamChat";
 
 export function useChat(defaultMessage) {
-  // ✅ ensure messages starts as [] if nothing in localStorage or defaultMessage
   const [messages, setMessages] = useState(() => {
     const saved = localStorage.getItem("chatMessages");
     if (saved) return JSON.parse(saved);
@@ -25,7 +24,6 @@ export function useChat(defaultMessage) {
   const handleSendMessage = async () => {
     if (!inputText.trim()) return;
 
-    // 1) Push user message
     const userMessage = {
       id: Date.now(),
       text: inputText,
@@ -36,7 +34,6 @@ export function useChat(defaultMessage) {
     setInputText("");
     setIsTyping(true);
 
-    // 2) Create a stable bot placeholder
     const botId = `${userMessage.id}-bot`;
     setMessages((prev) => [
       ...prev,
@@ -44,7 +41,6 @@ export function useChat(defaultMessage) {
     ]);
     scrollToBottom();
 
-    // 3) Stream from backend
     const controller = new AbortController();
 
     await streamChat({
@@ -52,7 +48,6 @@ export function useChat(defaultMessage) {
         query: userMessage.text,
         session_token: "hardcoded_string25",
       },
-      // useChat.js
       onChunk: (chunk) => {
         setMessages((prev) =>
           prev.map((m) =>
