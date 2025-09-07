@@ -6,13 +6,13 @@ function saveToken(token) {
 
 // Free (anonymous) chat
 export const sendMessageFree = async (msg) => {
-  const response = await axiosInstance.post("/chat/anonymous", msg);
+  const response = await axiosInstance.post("/api/chat/anonymous", msg);
   return response.data;
 };
 
 // Premium (authenticated) chat
 export const sendMessagePremium = async (msg) => {
-  const response = await axiosInstance.post("/chat/premium", msg);
+  const response = await axiosInstance.post("/api/chat/premium", msg);
   return response.data;
 };
 

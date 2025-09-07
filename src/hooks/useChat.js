@@ -9,24 +9,6 @@ export function useChat(user, currentSession, onUpdateSession) {
   const messagesEndRef = useRef(null);
   const textareaRef = useRef(null);
 
-  const sessionTokenRef = useRef(
-    user?.isPremium
-      ? currentSession?.sessionToken ||
-          Math.random().toString(36).substring(2, 10)
-      : localStorage.getItem("sessionToken") ||
-          Math.random().toString(36).substring(2, 10)
-  );
-
-  // store it for premium users
-  if (user?.isPremium && currentSession && !currentSession.sessionToken) {
-    currentSession.sessionToken = sessionTokenRef.current;
-  }
-
-  // store it for free/anonymous users
-  if (!user?.isPremium) {
-    localStorage.setItem("sessionToken", sessionTokenRef.current);
-  }
-
   // Reset messages when session changes
   useEffect(() => {
     setMessages(currentSession?.messages || []);
@@ -36,29 +18,38 @@ export function useChat(user, currentSession, onUpdateSession) {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
 
+  const generateToken = () => Math.random().toString(36).substring(2, 10);
+
+  const getSessionToken = (isPremium) => {
+    const storageKey = isPremium ? "premiumSessionToken" : "freeSessionToken";
+    let token = localStorage.getItem(storageKey);
+
+    if (!token) {
+      token = generateToken();
+      localStorage.setItem(storageKey, token);
+    }
+
+    return token;
+  };
+
+  const sessionTokenRef = useRef(getSessionToken(user?.isPremium));
+
   const sendMessageToServer = async (messageText) => {
-    if (user?.isPremium) {
-      try {
-        const res = await sendMessagePremium({
-          query: messageText,
-          session_token: sessionTokenRef.current,
-        });
-        return res.answer ?? res.error ?? "❌ Something went wrong.";
-      } catch (err) {
-        console.error(err);
-        return err.message ?? "❌ Something went wrong.";
-      }
-    } else {
-      try {
-        const res = await sendMessageFree({
-          query: messageText,
-          session_token: sessionTokenRef.current,
-        });
-        return res.answer ?? res.error ?? "❌ Something went wrong.";
-      } catch (err) {
-        console.error(err);
-        return err.message ?? "❌ Something went wrong.";
-      }
+    try {
+      const res = user?.isPremium
+        ? await sendMessagePremium({
+            query: messageText,
+            access_token: sessionTokenRef.current,
+          })
+        : await sendMessageFree({
+            query: messageText,
+            access_token: sessionTokenRef.current,
+          });
+
+      return res.answer ?? res.error ?? "❌ Something went wrong.";
+    } catch (err) {
+      console.error(err);
+      return err.message ?? "❌ Something went wrong.";
     }
   };
 
