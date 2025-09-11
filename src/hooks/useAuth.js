@@ -58,6 +58,7 @@ export function useAuth(setCurrentView) {
       setUser(newUser);
       localStorage.setItem("lumora_user", JSON.stringify(newUser));
       localStorage.setItem("access_token", response.access_token);
+      localStorage.removeItem("freeUserChat");
 
       return newUser;
     } catch (err) {
@@ -69,9 +70,10 @@ export function useAuth(setCurrentView) {
 
   const handleLogout = () => {
     setUser(null);
-    setCurrentView("chat");
+    localStorage.removeItem("freeUserChat");
     localStorage.removeItem("lumora_user");
     localStorage.removeItem("access_token");
+    setCurrentView("chat");
   };
 
   return {

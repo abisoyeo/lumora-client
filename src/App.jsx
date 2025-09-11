@@ -27,23 +27,27 @@ const App = () => {
     setCurrentView("chat");
   };
 
-  const createNewSession = () => {
+  const handleCreateNewSession = (options = {}) => {
     if (!user?.isPremium && chatSessions.length > 0) return;
 
     const newCount =
       chatSessions.filter((s) => s && s.title?.startsWith("New Conversation"))
         .length + 1;
-
     const newSession = {
-      id: Date.now().toString(),
-      title: user?.isPremium ? `New Conversation ${newCount}` : "Free Chat",
-      lastMessage: "",
-      timestamp: new Date(),
+      id: Date.now(),
+      title:
+        options.title || user?.isPremium
+          ? `New Conversation ${newCount}`
+          : "Free Chat",
       messages: [],
+      lastMessage: options.context || "New conversation started",
+      timestamp: new Date(),
+      documentIds: options.documentIds || [],
       userId: user?.id || "free",
     };
 
     setChatSessions((prev) => [newSession, ...prev]);
+
     setCurrentSession(newSession);
 
     if (user?.isPremium) {
@@ -55,12 +59,13 @@ const App = () => {
     setCurrentView("chat");
   };
 
-  const updateSession = (updatedSession) => {
+  const handleUpdateSession = (updatedSession) => {
     if (!updatedSession) return;
 
     const sessionToSave = {
       ...updatedSession,
       timestamp: new Date(),
+      documentIds: updatedSession.documentIds || [],
     };
 
     if (sessionToSave.messages.length > 0) {
@@ -80,7 +85,7 @@ const App = () => {
           .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp))
       );
       setCurrentSession(sessionToSave);
-      saveSession(sessionToSave);
+      saveSession(sessionToSave); // ✅ PRESERVED: Your original save function
     } else {
       localStorage.setItem(
         "freeUserChat",
@@ -140,16 +145,16 @@ const App = () => {
         onLogout={handleLogout}
         isMobileMenuOpen={isMobileMenuOpen}
         setIsMobileMenuOpen={setIsMobileMenuOpen}
-        onCreateNewSession={createNewSession}
+        onCreateNewSession={handleCreateNewSession}
         canCreateNew={!!user?.isPremium}
       />
 
-      <main className="container mx-auto px-4 pt-2 md:py-8 max-w-6xl">
+      <main className="container mx-auto px-4 pt-2 md:py-4 max-w-6xl">
         {currentView === "chat" && (
           <ChatbotComponent
             user={user}
             currentSession={currentSession}
-            onUpdateSession={updateSession}
+            onUpdateSession={handleUpdateSession}
             onLogin={() => setCurrentView("login")}
           />
         )}
@@ -185,7 +190,7 @@ const App = () => {
             user={user}
             chatSessions={chatSessions}
             onSelectSession={selectSession}
-            onCreateNewSession={createNewSession}
+            onCreateNewSession={handleCreateNewSession}
             onDeleteSession={deleteSession}
           />
         )}

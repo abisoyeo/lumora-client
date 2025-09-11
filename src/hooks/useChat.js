@@ -9,7 +9,6 @@ export function useChat(user, currentSession, onUpdateSession) {
   const messagesEndRef = useRef(null);
   const textareaRef = useRef(null);
 
-  // Reset messages when session changes
   useEffect(() => {
     setMessages(currentSession?.messages || []);
   }, [currentSession?.id]);
@@ -36,10 +35,13 @@ export function useChat(user, currentSession, onUpdateSession) {
 
   const sendMessageToServer = async (messageText) => {
     try {
+      const documentIds = currentSession?.documentIds || [];
+
       const res = user?.isPremium
         ? await sendMessagePremium({
             query: messageText,
             access_token: sessionTokenRef.current,
+            document_ids: documentIds,
           })
         : await sendMessageFree({
             query: messageText,
@@ -66,8 +68,11 @@ export function useChat(user, currentSession, onUpdateSession) {
     const updatedMessages = [...messages, userMessage];
     setMessages(updatedMessages);
 
-    // Update session immediately with user's message
-    onUpdateSession?.({ ...currentSession, messages: updatedMessages });
+    onUpdateSession?.({
+      ...currentSession,
+      messages: updatedMessages,
+      documentIds: currentSession?.documentIds || [],
+    });
 
     setInputText("");
     setIsTyping(true);
@@ -84,8 +89,11 @@ export function useChat(user, currentSession, onUpdateSession) {
     const finalMessages = [...updatedMessages, botMessage];
     setMessages(finalMessages);
 
-    // Final session update
-    onUpdateSession?.({ ...currentSession, messages: finalMessages });
+    onUpdateSession?.({
+      ...currentSession,
+      messages: finalMessages,
+      documentIds: currentSession?.documentIds || [],
+    });
 
     setIsTyping(false);
 
@@ -96,6 +104,7 @@ export function useChat(user, currentSession, onUpdateSession) {
 
   return {
     messages,
+    setMessages,
     inputText,
     setInputText,
     isTyping,

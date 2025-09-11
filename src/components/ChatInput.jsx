@@ -10,6 +10,7 @@ export default function ChatInput({
   onSendMessage,
   onFileSelect,
   isLoading,
+  isUploading,
   user,
 }) {
   const textareaRef = useRef(null);
@@ -38,7 +39,11 @@ export default function ChatInput({
     <div className="w-full">
       <div className="flex bg-slate-700 rounded-4xl items-center gap-1 md:gap-3 px-3 md:py-2">
         {user?.isPremium && (
-          <FileUpload onFileSelect={onFileSelect} variant="icon" />
+          <FileUpload
+            onFileSelect={onFileSelect}
+            disabled={isUploading}
+            variant="icon"
+          />
         )}
         <textarea
           ref={textareaRef}
@@ -52,7 +57,9 @@ export default function ChatInput({
         />
         <button
           onClick={onSendMessage}
-          disabled={(!inputText.trim() && !isLoading) || isLoading}
+          disabled={
+            (!inputText.trim() && !isLoading) || isLoading || isUploading
+          }
           className={`p-2 rounded-lg transition-colors flex-shrink-0 ${
             inputText.trim() && !isLoading
               ? "bg-[#4ade80] text-[#1f2937] hover:bg-[#30c522]"
