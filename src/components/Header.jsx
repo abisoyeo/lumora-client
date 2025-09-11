@@ -112,7 +112,7 @@ const Header = ({
 
       {/* Mobile Navigation */}
       {isMobileMenuOpen && (
-        <div className="md:hidden border-t border-slate-700">
+        <div className="md:hidden bg-slate-800 p-2 w-full z-40 absolute top-16 left-0 border-t border-slate-700">
           <div className="px-4 py-4 space-y-2">
             {navItems.map((item) => (
               <button
