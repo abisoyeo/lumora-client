@@ -25,7 +25,6 @@ const Dashboard = ({
       const response = await axiosInstance.get(
         `/api/documents?page=${page}&per_page=10`
       );
-      console.log(response);
       if (response.data.success) {
         const data = response.data;
         if (page === 1) {
