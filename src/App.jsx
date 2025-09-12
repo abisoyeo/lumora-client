@@ -12,6 +12,7 @@ import {
   deleteSession as dbDeleteSession,
 } from "./lib/db";
 import { useAuth } from "./hooks/useAuth";
+import { useLocalStorageWithExpiry } from "./hooks/useLocalStorageWithExpiry";
 
 const App = () => {
   const [currentView, setCurrentView] = useState("chat");
@@ -21,6 +22,12 @@ const App = () => {
 
   const { user, error, handleLogin, handleSignup, handleLogout, setError } =
     useAuth(setCurrentView);
+
+  const [freeMessages, setFreeMessages] = useLocalStorageWithExpiry(
+    "freeUserChat",
+    [],
+    30 * 60 * 1000
+  );
 
   const selectSession = (session) => {
     setCurrentSession(session);
@@ -53,7 +60,8 @@ const App = () => {
     if (user?.isPremium) {
       saveSession(newSession);
     } else {
-      localStorage.setItem("freeUserChat", JSON.stringify([]));
+      // localStorage.setItem("freeUserChat", JSON.stringify([]));
+      setFreeMessages([]);
     }
 
     setCurrentView("chat");
@@ -85,12 +93,13 @@ const App = () => {
           .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp))
       );
       setCurrentSession(sessionToSave);
-      saveSession(sessionToSave); // ✅ PRESERVED: Your original save function
+      saveSession(sessionToSave);
     } else {
-      localStorage.setItem(
-        "freeUserChat",
-        JSON.stringify(sessionToSave.messages || [])
-      );
+      // localStorage.setItem(
+      //   "freeUserChat",
+      //   JSON.stringify(sessionToSave.messages || [])
+      // );
+      setFreeMessages(sessionToSave.messages || []);
       setCurrentSession(sessionToSave);
       setChatSessions([sessionToSave]);
     }
@@ -118,13 +127,11 @@ const App = () => {
     if (user?.isPremium) {
       getAllSessions(user.id).then((sessions) => setChatSessions(sessions));
     } else {
-      const saved = localStorage.getItem("freeUserChat");
-      if (saved) {
-        const messages = JSON.parse(saved);
+      if (freeMessages.length > 0) {
         const defaultSession = {
           id: "free-session",
           title: "Free Chat",
-          messages,
+          messages: freeMessages,
           timestamp: new Date(),
         };
         setCurrentSession(defaultSession);
@@ -134,7 +141,7 @@ const App = () => {
         setChatSessions([]);
       }
     }
-  }, [user]);
+  }, [user, freeMessages]);
 
   return (
     <div className="min-h-screen bg-slate-900 text-gray-100">
