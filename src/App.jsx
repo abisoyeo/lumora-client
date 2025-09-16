@@ -127,7 +127,7 @@ const App = () => {
     if (user?.isPremium) {
       getAllSessions(user.id).then((sessions) => setChatSessions(sessions));
     } else {
-      if (freeMessages.length > 0) {
+      if (freeMessages?.length > 0) {
         const defaultSession = {
           id: "free-session",
           title: "Free Chat",
