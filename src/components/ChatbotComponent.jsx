@@ -65,6 +65,7 @@ export default function ChatbotComponent({
       onUpdateSession?.({
         ...updatedSession,
         messages: updatedMessages,
+        sessionToken: currentSession?.sessionToken, // Preserve existing token
       });
     } catch (error) {
       console.error("Error uploading file:", error);
@@ -83,6 +84,7 @@ export default function ChatbotComponent({
       onUpdateSession?.({
         ...currentSession,
         messages: updatedMessages,
+        sessionToken: currentSession?.sessionToken, // Preserve existing token
       });
     } finally {
       setIsUploading(false); // ✅ stop loading

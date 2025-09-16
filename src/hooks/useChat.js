@@ -11,7 +11,9 @@ export function useChat(user, currentSession, onUpdateSession) {
 
   useEffect(() => {
     setMessages(currentSession?.messages || []);
-  }, [currentSession?.id]);
+    // Update session token when session changes
+    sessionTokenRef.current = getSessionToken(currentSession, user?.isPremium);
+  }, [currentSession?.id, user?.isPremium]);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -19,23 +21,42 @@ export function useChat(user, currentSession, onUpdateSession) {
 
   const generateToken = () => Math.random().toString(36).substring(2, 10);
 
-  const getSessionToken = (isPremium) => {
-    const storageKey = isPremium ? "premiumSessionToken" : "freeSessionToken";
-    let token = localStorage.getItem(storageKey);
-
-    if (!token) {
-      token = generateToken();
-      localStorage.setItem(storageKey, token);
+  const getSessionToken = (session, isPremium) => {
+    // For premium users, generate a new token per session
+    // For free users, use a single token stored in localStorage
+    if (isPremium) {
+      // Check if session already has a token stored
+      if (session?.sessionToken) {
+        return session.sessionToken;
+      }
+      // Generate new token for this session
+      return generateToken();
+    } else {
+      // Free users still use persistent token
+      const storageKey = "freeSessionToken";
+      let token = localStorage.getItem(storageKey);
+      if (!token) {
+        token = generateToken();
+        localStorage.setItem(storageKey, token);
+      }
+      return token;
     }
-
-    return token;
   };
 
-  const sessionTokenRef = useRef(getSessionToken(user?.isPremium));
+  const sessionTokenRef = useRef(getSessionToken(currentSession, user?.isPremium));
 
   const sendMessageToServer = async (messageText) => {
     try {
       const documentIds = currentSession?.documentIds || [];
+
+      // For premium users, ensure the session token is saved to the session
+      if (user?.isPremium && currentSession && !currentSession.sessionToken) {
+        // Update the session with the token through the callback
+        onUpdateSession?.({
+          ...currentSession,
+          sessionToken: sessionTokenRef.current,
+        });
+      }
 
       const res = user?.isPremium
         ? await sendMessagePremium({
@@ -72,6 +93,7 @@ export function useChat(user, currentSession, onUpdateSession) {
       ...currentSession,
       messages: updatedMessages,
       documentIds: currentSession?.documentIds || [],
+      sessionToken: user?.isPremium ? sessionTokenRef.current : undefined,
     });
 
     setInputText("");
@@ -93,6 +115,7 @@ export function useChat(user, currentSession, onUpdateSession) {
       ...currentSession,
       messages: finalMessages,
       documentIds: currentSession?.documentIds || [],
+      sessionToken: user?.isPremium ? sessionTokenRef.current : undefined,
     });
 
     setIsTyping(false);
